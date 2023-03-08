@@ -1,0 +1,56 @@
+pipeline {
+  agent none    # 각 단계마다 컨테이너를 띄우야 하기 때문에 각 스테이지마다 필요할 경우 설정
+  
+  triggers {
+    pollSCM '* * * * *'
+  }
+
+  parameters {
+    string defaultValue: 'hello-world', name: 'IMAGE_NAME'
+    string defaultValue: 'shinhyeonsik', name: 'IMAGE_REGISTRY_ACOOUNT'
+  }
+
+  stages {
+    stage('SCM Checkout') {
+      agent any
+      steps {
+        git branch: 'main', url: 'https://github.com/hsshin0602/source-maven-java-spring-hello-webapp.git'
+      }
+    }
+    # 테스트는 생략
+    stage('Build Maven Project') {
+      agent { 
+        docker {image 'maven:3-openjdk-8'} 
+      }
+      steps {
+        sh 'mvn clean package -DskipTests=true' 
+      }
+    }
+    # 빌드와 테스트는 분리시키는게 좋음
+    stage('test Maven Project ') {  
+      steps {
+        sh 'mvn test'
+      }
+    }
+
+    # image 빌드와 tagging를 같이해도 됨
+    stage('Build Docker Image') {
+      agent any
+      steps {
+        sh 'docker image build -t $(params.IMAGE_NAME)'
+      }
+    }
+
+    stage('Tagging Docker Image') {
+      steps {
+        sh 'docker image tag $(params.IMAGE_REGISTRY_ACOOUNT)'
+      }
+    }
+  
+    stage('Publish Docker Image') {
+      steps {
+        
+      } 
+    }
+  }
+}
