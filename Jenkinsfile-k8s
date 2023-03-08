@@ -1,0 +1,76 @@
+pipeline {
+  agent {
+    kubernetes {
+yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3-openjdk-8
+    command: ['sleep']
+    args: ['infinity']
+  - name: kaniko
+    iamge: gcr.io/kaniko-project/executor:debug
+    command: ['sleep']
+    args: ['infinity']
+    volumeMounts:
+      - name: registry-credentials
+        mountPath: /kaniko/.docker
+  volumes:
+    - name: regidtry-credentials
+      secret:
+        secretName: regcred
+        items: 
+        - key: .dockerconfigjson
+          path: config.json
+'''
+    }
+  }
+
+  triggers {
+    pollSCM '* * * * *'
+  }
+
+  parameters {
+    string name: 'IMAGE_NAME', defaultValue: 'hello-world'
+    string name: 'IMAGE_REGISTRY_ACCOUNT', defaultValue: 'c1t1d0s7'
+  }
+
+  stages {
+    stage('SCM Checkout') {
+      steps {
+        container('maven') {
+          git branch: 'main', url: 'https://github.com/c1t1d0s7/hello-webapp.git'
+        }
+      }
+    }
+
+    stage('Build Maven Project') {
+      steps {
+        container('maven') {
+          sh 'mvn clean package -DskipTests=true'
+        }
+      }
+    }
+
+    stage('Test Maven Project') {
+      steps {
+        container('maven') {
+          sh 'mvn test'
+        }
+      }
+    }
+
+    stage('Build and Tag Docker Image') {
+        steps {
+            container('kaniko') {
+              sh "executor --dockerfile=Dockerfile \
+              --context=dir://${env.WORKSPACE} \
+              --destination=${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}:${env.BUILD_NOMBER} \
+              --destination=${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}:latest"
+            }
+        }
+    }
+  }
+}
