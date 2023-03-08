@@ -6,8 +6,8 @@ pipeline {
   }
 
   parameters {
-    string defaultValue: 'hello-world', name: 'IMAGE_NAME'
-    string defaultValue: 'shinhyeonsik', name: 'IMAGE_REGISTRY_ACOOUNT'
+    string name: 'IMAGE_NAME', defaultValue: 'hello-world'
+    string name: 'IMAGE_REGISTRY_ACCOUNT', defaultValue: 'shinhyeonsik'
   }
 
   stages {
