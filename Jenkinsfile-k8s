@@ -11,20 +11,19 @@ spec:
     command: ['sleep']
     args: ['infinity']
   - name: kaniko
-    iamge: gcr.io/kaniko-project/executor:debug
+    image: gcr.io/kaniko-project/executor:debug
     command: ['sleep']
     args: ['infinity']
     volumeMounts:
-      - name: registry-credentials
-        mountPath: /kaniko/.docker
+    - name: registry-credentials
+      mountPath: /kaniko/.docker
   volumes:
-    - name: regidtry-credentials
-      secret:
-        secretName: regcred
-        items: 
-        - key: .dockerconfigjson
-          path: config.json
-          
+  - name: registry-credentials
+    secret:
+      secretName: regcred
+      items:
+      - key: .dockerconfigjson
+        path: config.json
 '''
     }
   }
@@ -63,15 +62,15 @@ spec:
       }
     }
 
-    stage('Build and Tag Docker Image') {
-        steps {
-            container('kaniko') {
-              sh "executor --dockerfile=Dockerfile \
-              --context=dir://${env.WORKSPACE} \
-              --destination=${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}:${env.BUILD_NOMBER} \
-              --destination=${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}:latest"
-            }
+    stage('Build & Tag Docker Image') {
+      steps {
+        container('kaniko') {
+          sh "executor --dockerfile=Dockerfile \
+            --context=dir://${env.WORKSPACE} \
+            --destination=${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}:${env.BUILD_NUMBER} \
+            --destination=${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}:latest"
         }
+      }
     }
   }
 }
