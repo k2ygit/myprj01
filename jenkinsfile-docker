@@ -40,7 +40,7 @@ pipeline {
     stage('Build Docker Image') {
       agent any
       steps {
-        sh 'docker image build -t $(params.IMAGE_NAME)'
+        sh 'docker image build -t $(params.IMAGE_NAME) .'
       }
     }
 
