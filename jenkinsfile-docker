@@ -40,14 +40,14 @@ pipeline {
     stage('Build Docker Image') {
       agent any
       steps {
-        sh "docker image build -t $(params.IMAGE_NAME) ."
+        sh "docker image build -t ${params.IMAGE_NAME} ."
       }
     }
 
     stage('Tagging Docker Image') {
       agent any
       steps {
-        sh "docker image tag $(params.IMAGE_NAME) $(params.IMAGE_REGISTRY_ACOOUNT)/$(params.IMAGE_NAME)"
+        sh "docker image tag ${params.IMAGE_NAME} ${params.IMAGE_REGISTRY_ACOOUNT}/${params.IMAGE_NAME}"
       }
     }
   
