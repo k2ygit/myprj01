@@ -7,14 +7,14 @@ pipeline {
 
   parameters {
     string name: 'IMAGE_NAME', defaultValue: 'hello-world'
-    string name: 'IMAGE_REGISTRY_ACCOUNT', defaultValue: 'shinhyeonsik'
+    string name: 'IMAGE_REGISTRY_ACCOUNT', defaultValue: 'k2ydocker'
   }
 
   stages {
     stage('SCM Checkout') {
       agent any
       steps {
-        git branch: 'main', url: 'https://github.com/hsshin0602/source-maven-java-spring-hello-webapp.git'
+        git branch: 'main', url: 'https://github.com/k2ygit/myprj01.git'
       }
     }
     
@@ -54,8 +54,8 @@ pipeline {
     stage('Publish Docker Image') {
       agent any
       steps {
-        withDockerRegistry(credentialsId: 'docker-hub-token', url: 'https://index.docker.io/v1/') {
-          sh "docker image push ${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}"
+        withDockerRegistry(credentialsId: 'docker-hub-token', url: 'https://registry.hub.docker.com') {
+          sh "docker image push ${params.IMAGE_REGISTRY_ACCOUNT}/${params.IMAGE_NAME}"  
         }
       }
     }
